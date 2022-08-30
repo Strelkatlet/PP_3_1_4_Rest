@@ -16,22 +16,17 @@ import java.util.Set;
 public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
     private Long id;
 
-    @Column(name = "username")
+    @Column(name = "Email_address")
     private String username;
 
-    @Column(name = "lastName")
+    private String firstName;
+
     private String lastName;
 
-    @Column(name = "age")
     private Integer age;
 
-    @Column(name = "mail")
-    private String mail;
-
-    @Column(name = "password")
     private String password;
 
     @ManyToMany
