@@ -1,9 +1,10 @@
-package ru.kata.spring.boot_security.demo;
+package ru.kata.spring.boot_security_rest;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 
-@SpringBootApplication
+@SpringBootApplication(exclude = {SecurityAutoConfiguration.class})
 public class SpringBootSecurityDemoApplication {
 
 	public static void main(String[] args) {

@@ -1,4 +1,4 @@
-package ru.kata.spring.boot_security.demo.model;
+package ru.kata.spring.boot_security_rest.model;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,10 +15,5 @@ public class Role implements GrantedAuthority {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
-
-    @Override
-    public String getAuthority() {
-        return getName();
-    }
+    private String authority;
 }

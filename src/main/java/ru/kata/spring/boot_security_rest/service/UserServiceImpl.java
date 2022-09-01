@@ -1,4 +1,4 @@
-package ru.kata.spring.boot_security.demo.service;
+package ru.kata.spring.boot_security_rest.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -8,8 +8,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.kata.spring.boot_security.demo.model.User;
-import ru.kata.spring.boot_security.demo.repository.UserRepository;
+import ru.kata.spring.boot_security_rest.model.User;
+import ru.kata.spring.boot_security_rest.repository.UserRepository;
 
 import java.security.InvalidParameterException;
 import java.util.List;
@@ -27,26 +27,28 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     @Transactional
-    public void saveUser(User user) {
+    public boolean saveUser(User user) {
         User userFromDB = userRepository.findByUsername(user.getUsername());
-        if (userFromDB == null) {
-            user.setPassword(passwordEncoder.encode(user.getPassword()));
-            userRepository.save(user);
+        if (userFromDB != null) {
+            return false;
         }
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        userRepository.save(user);
+        return true;
     }
 
     @Override
+    @Transactional(readOnly = true)
     public User getUserById(Long id) {
-        return userRepository.getReferenceById(id);
+        return userRepository.findById(id).get();
     }
 
     @Override
     @Transactional
-    public void updateUser(Long id, User user) {
+    public boolean updateUser(User user) throws InvalidParameterException {
         if (userRepository.findByUsername(user.getUsername()) != null &&
                 !userRepository.findByUsername(user.getUsername()).getId().equals(user.getId())) {
-            throw new InvalidParameterException("Cannot save user, such email already exists in the database: "
-                    + user.getUsername());
+            return false;
         }
         if (user.getPassword().isEmpty()) {
             user.setPassword(userRepository.findById(user.getId()).get().getPassword());
@@ -54,28 +56,35 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             user.setPassword(passwordEncoder.encode(user.getPassword()));
         }
         userRepository.save(user);
+        return true;
     }
 
     @Override
-    public void deleteUser(Long id) {
-        if (userRepository.findById(id).isPresent()) {
-            userRepository.deleteById(id);
+    @Transactional
+    public boolean deleteUser(Long id) {
+        if (userRepository.findById(id).isEmpty()) {
+            return false;
         }
+        userRepository.deleteById(id);
+        return true;
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
 
     @Override
-    public User getUserByName(String username) {
+    @Transactional(readOnly = true)
+    public User getUserByUsername(String username) {
         return userRepository.findByUsername(username);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = getUserByName(username);
+        User user = getUserByUsername(username);
         if (user == null) {
             throw new UsernameNotFoundException(String.format("User '%s' not found", username));
         }
